@@ -1,3 +1,5 @@
+package serializableObj;
+
 /**
  * Created by Zver on 06.12.2015.
  */

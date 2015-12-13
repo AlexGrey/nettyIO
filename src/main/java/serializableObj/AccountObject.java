@@ -1,17 +1,12 @@
-package impl;
+package serializableObj;
 
 /**
  * Created by Zver on 09.12.2015.
  */
-public class UserImpl {
+public class AccountObject {
     String name;
     String password;
-    boolean isAuth;
-
-    public UserImpl(String name, String password) {
-        this.name = name;
-        this.password = password;
-    }
+    String answer;
 
     public String getName() {
         return name;
@@ -29,11 +24,11 @@ public class UserImpl {
         this.password = password;
     }
 
-    public boolean isAuth() {
-        return isAuth;
+    public String getAnswer() {
+        return answer;
     }
 
-    public void setAuth(boolean auth) {
-        isAuth = auth;
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 }

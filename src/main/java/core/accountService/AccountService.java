@@ -1,7 +1,6 @@
-package interfaces;
+package core.accountService;
 
-import com.corundumstudio.socketio.SocketIOClient;
-import impl.UserImpl;
+import core.accountService.UserImpl;
 
 import java.util.List;
 
@@ -10,6 +9,6 @@ import java.util.List;
  */
 public interface AccountService {
     void registration(UserImpl user);
-    void auth();
+    void auth(UserImpl user);
     List<UserImpl> getUsers();
 }
