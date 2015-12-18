@@ -1,20 +1,27 @@
 package core.accountService;
 
+import java.util.UUID;
+
 /**
  * Created by Zver on 09.12.2015.
  */
 public class UserImpl {
+    UUID uuid;
     String name;
     String password;
     boolean isAuth;
     int wins = 0;
     int lose = 0;
 
-    public UserImpl(String name, String password) {
+    public UserImpl(UUID uuid,String name, String password) {
+        this.uuid = uuid;
         this.name = name;
         this.password = password;
     }
 
+    public UUID getUuid() {
+        return uuid;
+    }
     public String getName() {
         return name;
     }

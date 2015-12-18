@@ -1,9 +1,11 @@
 package core.storageService;
 
+import com.corundumstudio.socketio.SocketIOClient;
 import core.accountService.UserImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Zver on 13.12.2015.
@@ -11,7 +13,7 @@ import java.util.List;
 public class StorageImpl {
     private static volatile StorageImpl instance;
     volatile List<UserImpl> users = new ArrayList();
-    volatile List<UserImpl> usersOnline = new ArrayList();
+    volatile List<UUID> usersOnline = new ArrayList();
 
     private StorageImpl() {
 
@@ -30,11 +32,11 @@ public class StorageImpl {
         users.add(user);
     }
 
-    public void addToUsersOnline(UserImpl user) {
-        usersOnline.add(user);
+    public void addToUsersOnline(SocketIOClient user) {
+        usersOnline.add(user.getSessionId());
     }
 
-    public void removeToUsersOnline(UserImpl user) {
+    public void removeToUsersOnline(UUID user) {
         usersOnline.remove(user);
     }
 
@@ -42,7 +44,12 @@ public class StorageImpl {
         return this.users;
     }
 
-    public int getUsersOnline() {
+    public int getAmountUsersOnline() {
         return usersOnline.size();
     }
+
+    public List<UUID> getUsersOnline() {
+        return this.usersOnline;
+    }
+
 }

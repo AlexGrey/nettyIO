@@ -1,9 +1,11 @@
 package core.accountService;
 
+import com.corundumstudio.socketio.SocketIOClient;
 import core.storageService.StorageImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Zver on 09.12.2015.
@@ -31,8 +33,12 @@ public class AccountServiceImpl implements AccountService {
         StorageImpl.getInstance().addNew(user);
     }
 
-    public void auth(UserImpl user) {
-        StorageImpl.getInstance().addToUsersOnline(user);
+    public void auth(SocketIOClient client) {
+        StorageImpl.getInstance().addToUsersOnline(client);
+    }
+
+    public void refuse(UUID id) {
+        StorageImpl.getInstance().removeToUsersOnline(id);
     }
 
     public List<UserImpl> getUsers() {
@@ -40,7 +46,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public int getUsersOnline() {
-        return StorageImpl.getInstance().getUsersOnline();
+        return StorageImpl.getInstance().getAmountUsersOnline();
     }
 
     public UserImpl findUserByName(String name) {
