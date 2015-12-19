@@ -7,6 +7,7 @@ import core.accountService.UserImpl;
 import core.storageService.StorageImpl;
 import core.utilities.ValidatorImpl;
 import serializableObj.AccountObject;
+import serializableObj.ChatObject;
 
 import java.util.UUID;
 
@@ -76,6 +77,13 @@ public class MainLauncher {
                     data.setAnswer("failure");
                 }
                 server.getClient(client.getSessionId()).sendEvent("userInfo", data);
+            }
+        });
+
+        server.addEventListener("sendToChat", ChatObject.class, new DataListener<ChatObject>() {
+            public void onData(SocketIOClient client, ChatObject data, AckRequest ackRequest) {
+                System.out.println(data.getName() + ":" + data.getMessage());
+                server.getBroadcastOperations().sendEvent("msgFromChat", data);
             }
         });
 

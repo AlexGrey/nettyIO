@@ -4,28 +4,21 @@ package serializableObj;
  * Created by Zver on 06.12.2015.
  */
 public class ChatObject {
-    private String userName;
+    private String name;
     private String message;
 
-    public ChatObject() {
+    public String getName() {
+        return name;
     }
 
-    public ChatObject(String userName, String message) {
-        super();
-        this.userName = userName;
-        this.message = message;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setName(String userName) {
+        this.name = userName;
     }
 
     public String getMessage() {
         return message;
     }
+
     public void setMessage(String message) {
         this.message = message;
     }
