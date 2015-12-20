@@ -6,8 +6,12 @@ import core.accountService.AccountServiceImpl;
 import core.accountService.UserImpl;
 import core.storageService.StorageImpl;
 import core.utilities.ValidatorImpl;
+import modules.gameMechanics.Room;
+import modules.matchMaking.MatchMaking;
 import serializableObj.AccountObject;
 import serializableObj.ChatObject;
+import serializableObj.FindGameObject;
+import serializableObj.RoomObject;
 
 import java.util.UUID;
 
@@ -23,9 +27,16 @@ public class MainLauncher {
         final SocketIOServer server = new SocketIOServer(config);
         final ValidatorImpl validator = new ValidatorImpl();
 
+        /*Временно*/
+        UserImpl user1 = new UserImpl("john", "123");
+        UserImpl user2 = new UserImpl("mike", "123");
+
+        AccountServiceImpl.getInstance().registration(user1);
+        AccountServiceImpl.getInstance().registration(user2);
+
         server.addEventListener("reg", AccountObject.class, new DataListener<AccountObject>() {
             public void onData(SocketIOClient client, AccountObject data, AckRequest ackRequest) {
-                UserImpl user = new UserImpl(client.getSessionId(), data.getName(), data.getPassword());
+                UserImpl user = new UserImpl(data.getName(), data.getPassword());
                 System.out.println(data.getName());
                 if (!validator.userIsExist(user, AccountServiceImpl.getInstance().getUsers())) {
                     AccountServiceImpl.getInstance().registration(user);
@@ -87,6 +98,46 @@ public class MainLauncher {
             }
         });
 
+        server.addEventListener("findGame", FindGameObject.class, new DataListener<FindGameObject>() {
+            public void onData(SocketIOClient client, FindGameObject data, AckRequest ackRequest) {
+
+                UserImpl user = AccountServiceImpl.getInstance().findUserByName(data.getName());
+
+                try{
+                    Room gameRoom = MatchMaking.getInstance().findRoom(1);
+                    gameRoom.addClient(client);
+                    gameRoom.addClient(user);
+                    data.setAnswer("gameIsReady");
+                    data.setUuid(gameRoom.getId().toString());
+                    for (SocketIOClient player: gameRoom.getClientsId()) {
+                        server.getClient(player.getSessionId()).sendEvent("findGame", data);
+                    }
+                } catch(NullPointerException e){
+                    Room gameRoom = new Room();
+                    gameRoom.addClient(client);
+                    gameRoom.addClient(user);
+                    System.out.println("create room with id:" + gameRoom.getId());
+                    MatchMaking.getInstance().addAvailableRoom(gameRoom);
+                    data.setAnswer("roomCreate");
+                    server.getClient(client.getSessionId()).sendEvent("findGame", data);
+                }
+            }
+        });
+
+        server.addEventListener("roomInfo", RoomObject.class, new DataListener<RoomObject>() {
+            public void onData(SocketIOClient client, RoomObject data, AckRequest ackRequest) {
+                System.out.println("id:" + data.getId());
+                try {
+                    Room room = MatchMaking.getInstance().findRoomById(data.getId());
+                    data.setClientName1(room.getClients().get(0).getName());
+                    data.setClientName2(room.getClients().get(1).getName());
+                    server.getBroadcastOperations().sendEvent("roomInfo", data);
+                } catch (Exception e){
+                    System.out.println(e);
+                }
+            }
+        });
+
         server.addDisconnectListener(new DisconnectListener() {
             public void onDisconnect(SocketIOClient client) {
                 for (UUID id: StorageImpl.getInstance().getUsersOnline()) {
@@ -104,7 +155,6 @@ public class MainLauncher {
 
         server.addConnectListener(new ConnectListener() {
             public void onConnect(SocketIOClient socketIOClient) {
-                //server.getBroadcastOperations().sendEvent();
             }
         });
 

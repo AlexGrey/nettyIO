@@ -6,21 +6,22 @@ import java.util.UUID;
  * Created by Zver on 09.12.2015.
  */
 public class UserImpl {
-    UUID uuid;
+    long id;
     String name;
     String password;
     boolean isAuth;
     int wins = 0;
     int lose = 0;
 
-    public UserImpl(UUID uuid,String name, String password) {
-        this.uuid = uuid;
+    public UserImpl(String name, String password) {
+        this.id = AccountServiceImpl.getInstance().getLastUserId();
+        AccountServiceImpl.getInstance().setLastUserId(this.id + 1);
         this.name = name;
         this.password = password;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public long getUuid() {
+        return id;
     }
     public String getName() {
         return name;

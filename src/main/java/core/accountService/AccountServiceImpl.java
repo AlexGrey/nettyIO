@@ -14,6 +14,7 @@ public class AccountServiceImpl implements AccountService {
 
     private static volatile AccountServiceImpl instance;
     volatile List<UserImpl> users = new ArrayList();
+    volatile long lastUserId = 1;
 
     private AccountServiceImpl() {
 
@@ -28,6 +29,13 @@ public class AccountServiceImpl implements AccountService {
         return instance;
     }
 
+    public long getLastUserId() {
+        return lastUserId;
+    }
+
+    public void setLastUserId(long lastUserId) {
+        this.lastUserId = lastUserId;
+    }
 
     public void registration(UserImpl user) {
         StorageImpl.getInstance().addNew(user);
