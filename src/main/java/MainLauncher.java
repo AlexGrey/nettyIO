@@ -6,6 +6,7 @@ import core.accountService.AccountServiceImpl;
 import core.accountService.UserImpl;
 import core.storageService.StorageImpl;
 import core.utilities.ValidatorImpl;
+import modules.gameMechanics.Game;
 import modules.gameMechanics.Room;
 import modules.matchMaking.MatchMaking;
 import serializableObj.AccountObject;
@@ -37,7 +38,6 @@ public class MainLauncher {
         server.addEventListener("reg", AccountObject.class, new DataListener<AccountObject>() {
             public void onData(SocketIOClient client, AccountObject data, AckRequest ackRequest) {
                 UserImpl user = new UserImpl(data.getName(), data.getPassword());
-                System.out.println(data.getName());
                 if (!validator.userIsExist(user, AccountServiceImpl.getInstance().getUsers())) {
                     AccountServiceImpl.getInstance().registration(user);
                     data.setAnswer("пользователь с именем: " + user.getName() + " успешно зарегистрирован!");
@@ -52,8 +52,9 @@ public class MainLauncher {
             public void onData(SocketIOClient client, AccountObject data, AckRequest ackRequest) {
                 try {
                     UserImpl user = AccountServiceImpl.getInstance().findUserByName(data.getName());
+                    user.setCurrentSessionId(client.getSessionId());
                     if (validator.correctUserData(data.getName(), data.getPassword())) {
-                        AccountServiceImpl.getInstance().auth(client);
+                        AccountServiceImpl.getInstance().auth(user);
                         data.setAnswer("success");
                     } else {
                         data.setAnswer("failure");
@@ -81,9 +82,11 @@ public class MainLauncher {
         server.addEventListener("userInfo", AccountObject.class, new DataListener<AccountObject>() {
             public void onData(SocketIOClient client, AccountObject data, AckRequest ackRequest) {
                 try {
-                    System.out.println(data);
-                    UserImpl user = AccountServiceImpl.getInstance().findUserByName(data.getName());
-                    data.setAnswer(user.getName() + ":" + user.getWins() + ":" + user.getLose());
+                    UserImpl user = AccountServiceImpl.getInstance().findUserBySessionId(client.getSessionId());
+                    data.setName(user.getName());
+                    data.setAnswer("Победы: " + user.getWins() + ", Поражения : " + user.getLose());
+                    System.out.println(data.getName());
+                    System.out.println(data.getAnswer());
                 } catch (NullPointerException e) {
                     data.setAnswer("failure");
                 }
@@ -93,30 +96,28 @@ public class MainLauncher {
 
         server.addEventListener("sendToChat", ChatObject.class, new DataListener<ChatObject>() {
             public void onData(SocketIOClient client, ChatObject data, AckRequest ackRequest) {
-                System.out.println(data.getName() + ":" + data.getMessage());
+                UserImpl user = AccountServiceImpl.getInstance().findUserBySessionId(client.getSessionId());
+                data.setName(user.getName());
                 server.getBroadcastOperations().sendEvent("msgFromChat", data);
             }
         });
 
         server.addEventListener("findGame", FindGameObject.class, new DataListener<FindGameObject>() {
             public void onData(SocketIOClient client, FindGameObject data, AckRequest ackRequest) {
-
-                UserImpl user = AccountServiceImpl.getInstance().findUserByName(data.getName());
-
+                UserImpl user = AccountServiceImpl.getInstance().findUserBySessionId(client.getSessionId());
                 try{
                     Room gameRoom = MatchMaking.getInstance().findRoom(1);
-                    gameRoom.addClient(client);
                     gameRoom.addClient(user);
                     data.setAnswer("gameIsReady");
                     data.setUuid(gameRoom.getId().toString());
-                    for (SocketIOClient player: gameRoom.getClientsId()) {
-                        server.getClient(player.getSessionId()).sendEvent("findGame", data);
+                    for (UserImpl player: gameRoom.getClients()) {
+                        server.getClient(player.getCurrentSessionId()).sendEvent("findGame", data);
                     }
                 } catch(NullPointerException e){
                     Room gameRoom = new Room();
-                    gameRoom.addClient(client);
+                    Game game = new Game(server, gameRoom.getClients());
+                    gameRoom.setGame(game);
                     gameRoom.addClient(user);
-                    System.out.println("create room with id:" + gameRoom.getId());
                     MatchMaking.getInstance().addAvailableRoom(gameRoom);
                     data.setAnswer("roomCreate");
                     server.getClient(client.getSessionId()).sendEvent("findGame", data);
@@ -126,7 +127,6 @@ public class MainLauncher {
 
         server.addEventListener("roomInfo", RoomObject.class, new DataListener<RoomObject>() {
             public void onData(SocketIOClient client, RoomObject data, AckRequest ackRequest) {
-                System.out.println("id:" + data.getId());
                 try {
                     Room room = MatchMaking.getInstance().findRoomById(data.getId());
                     data.setClientName1(room.getClients().get(0).getName());
@@ -138,11 +138,56 @@ public class MainLauncher {
             }
         });
 
+        server.addEventListener("readyToFight", AccountObject.class, new DataListener<AccountObject>() {
+            public void onData(SocketIOClient client, AccountObject data, AckRequest ackRequest) {
+                try {
+                    Room room = MatchMaking.getInstance().findRoomById(data.getId());
+                    room.findUserBySessionId(client.getSessionId()).setReadyToFight(true);
+
+                    if (room.allClientsReadyToFight()){
+                        data.setAnswer("allReady");
+                        for (UserImpl player: room.getClients()) {
+                            server.getClient(player.getCurrentSessionId()).sendEvent("readyToFight", data);
+                        }
+                        room.getGame().preGame(2);
+                    } else {
+                        data.setAnswer("notAllReady");
+                        server.getClient(client.getSessionId()).sendEvent("readyToFight", data);
+                    }
+                } catch (Exception e){
+                    System.out.println(e);
+                }
+            }
+        });
+
+        server.addEventListener("endGame", RoomObject.class, new DataListener<RoomObject>() {
+            public void onData(SocketIOClient client, RoomObject data, AckRequest ackRequest) {
+                System.out.println("id:" + data.getId());
+                try {
+                    Room room = MatchMaking.getInstance().findRoomById(data.getId());
+                    UserImpl user = AccountServiceImpl.getInstance().findUserBySessionId(client.getSessionId());
+                    user.setClicks(data.getClicks());
+                    System.out.println(user.getName() + user.getClicks());
+                    user.setGameFinish(true);
+                    room.getGame().updateCounterPlayers();
+                    for (UserImpl clients : room.getClients()) {
+                        System.out.println(user.isGameFinish());
+                    }
+                    System.out.println(room.getGame().getCounterPlayers());
+                    if (room.getGame().getCounterPlayers() == 2){
+                        room.getGame().endGame();
+                    }
+                } catch (Exception e){
+                    System.out.println(e);
+                }
+            }
+        });
+
         server.addDisconnectListener(new DisconnectListener() {
             public void onDisconnect(SocketIOClient client) {
-                for (UUID id: StorageImpl.getInstance().getUsersOnline()) {
-                    if (id.equals(client.getSessionId())) {
-                        AccountServiceImpl.getInstance().refuse(id);
+                for (UserImpl user: StorageImpl.getInstance().getUsersOnline()) {
+                    if (user.getCurrentSessionId().equals(client.getSessionId())) {
+                        AccountServiceImpl.getInstance().refuse(user.getCurrentSessionId());
                         break;
                     }
                 }

@@ -7,11 +7,16 @@ import java.util.UUID;
  */
 public class UserImpl {
     long id;
+    UUID currentSessionId;
     String name;
     String password;
     boolean isAuth;
+    boolean looser = true;
     int wins = 0;
     int lose = 0;
+    boolean readyToFight = false;
+    boolean gameFinish = false;
+    int clicks;
 
     public UserImpl(String name, String password) {
         this.id = AccountServiceImpl.getInstance().getLastUserId();
@@ -51,15 +56,55 @@ public class UserImpl {
         return wins;
     }
 
-    public void setWins(int wins) {
-        this.wins = wins;
+    public void setWins() {
+        this.wins++;
     }
 
     public int getLose() {
         return lose;
     }
 
-    public void setLose(int lose) {
-        this.lose = lose;
+    public void setLose() {
+        this.lose++;
+    }
+
+    public boolean isReadyToFight() {
+        return readyToFight;
+    }
+
+    public UUID getCurrentSessionId() {
+        return currentSessionId;
+    }
+
+    public void setCurrentSessionId(UUID currentSessionId) {
+        this.currentSessionId = currentSessionId;
+    }
+
+    public void setReadyToFight(boolean readyToFight) {
+        this.readyToFight = readyToFight;
+    }
+
+    public int getClicks() {
+        return clicks;
+    }
+
+    public void setClicks(int clicks) {
+        this.clicks = clicks;
+    }
+
+    public boolean isLooser() {
+        return looser;
+    }
+
+    public void setLooser(boolean looser) {
+        this.looser = looser;
+    }
+
+    public boolean isGameFinish() {
+        return gameFinish;
+    }
+
+    public void setGameFinish(boolean gameFinish) {
+        this.gameFinish = gameFinish;
     }
 }

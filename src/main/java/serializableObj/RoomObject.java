@@ -1,6 +1,7 @@
 package serializableObj;
 
 import core.accountService.UserImpl;
+import modules.gameMechanics.Game;
 
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ public class RoomObject {
     UUID id;
     String clientName1;
     String clientName2;
+    int clicks;
 
     public UUID getId() {
         return id;
@@ -34,5 +36,13 @@ public class RoomObject {
 
     public void setClientName2(String clientName2) {
         this.clientName2 = clientName2;
+    }
+
+    public int getClicks() {
+        return clicks;
+    }
+
+    public void setClicks(int clicks) {
+        this.clicks = clicks;
     }
 }

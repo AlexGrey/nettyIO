@@ -41,8 +41,8 @@ public class AccountServiceImpl implements AccountService {
         StorageImpl.getInstance().addNew(user);
     }
 
-    public void auth(SocketIOClient client) {
-        StorageImpl.getInstance().addToUsersOnline(client);
+    public void auth(UserImpl user) {
+        StorageImpl.getInstance().addToUsersOnline(user);
     }
 
     public void refuse(UUID id) {
@@ -64,6 +64,11 @@ public class AccountServiceImpl implements AccountService {
                 seekingUser = user;
             }
         }
+        return seekingUser;
+    }
+
+    public UserImpl findUserBySessionId(UUID id) {
+        UserImpl seekingUser =  StorageImpl.getInstance().findBySessionId(id);
         return seekingUser;
     }
 

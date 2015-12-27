@@ -11,6 +11,6 @@ import java.util.UUID;
  */
 public interface AccountService {
     void registration(UserImpl user);
-    void auth(SocketIOClient client);
+    void auth(UserImpl user);
     List<UserImpl> getUsers();
 }

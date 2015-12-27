@@ -2,18 +2,17 @@ package modules.gameMechanics;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import core.accountService.UserImpl;
+import core.storageService.StorageImpl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Zver on 19.12.2015.
  */
 public class Room {
     UUID id;
-    List<SocketIOClient> clientsId = new ArrayList<SocketIOClient>();
-    List<UserImpl> clients = new ArrayList<UserImpl>();
+    Game game;
+    List<UserImpl> clientsInTheRoom = new ArrayList<UserImpl>();
     String winner = null;
 
     public Room() {
@@ -24,23 +23,53 @@ public class Room {
         return id;
     }
 
-    public void addClient(SocketIOClient client) {
-        clientsId.add(client);
-    }
-
-    public List<SocketIOClient> getClientsId() {
-        return clientsId;
-    }
-
     public List<UserImpl> getClients() {
-        return clients;
+        return clientsInTheRoom;
     }
 
     public void addClient(UserImpl client) {
-        this.clients.add(client);
+        this.clientsInTheRoom.add(client);
     }
 
     public int playersInRoom() {
-        return clientsId.size();
+        return clientsInTheRoom.size();
+    }
+
+    public UserImpl findUserByName(String name) {
+        UserImpl user = null;
+        for (UserImpl client: clientsInTheRoom) {
+            if (client.getName().equals(name)){
+                user = client;
+            }
+        }
+        return user;
+    }
+
+    public UserImpl findUserBySessionId(UUID id) {
+        UserImpl user = null;
+        for (UserImpl client: clientsInTheRoom) {
+            if (client.getCurrentSessionId().equals(id)) {
+                user = client;
+            }
+        }
+        return user;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public boolean allClientsReadyToFight() {
+        boolean clientsReady = true;
+        for (UserImpl client: clientsInTheRoom) {
+            if (!client.isReadyToFight()){
+                clientsReady = false;
+            }
+        }
+        return clientsReady;
     }
 }

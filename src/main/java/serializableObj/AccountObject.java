@@ -1,5 +1,7 @@
 package serializableObj;
 
+import java.util.UUID;
+
 /**
  * Created by Zver on 09.12.2015.
  */
@@ -7,6 +9,15 @@ public class AccountObject {
     String name;
     String password;
     String answer;
+    UUID id;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

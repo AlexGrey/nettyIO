@@ -13,7 +13,7 @@ import java.util.UUID;
 public class StorageImpl {
     private static volatile StorageImpl instance;
     volatile List<UserImpl> users = new ArrayList();
-    volatile List<UUID> usersOnline = new ArrayList();
+    volatile List<UserImpl> usersOnline = new ArrayList();
 
     private StorageImpl() {
 
@@ -32,12 +32,12 @@ public class StorageImpl {
         users.add(user);
     }
 
-    public void addToUsersOnline(SocketIOClient user) {
-        usersOnline.add(user.getSessionId());
+    public void addToUsersOnline(UserImpl user) {
+        usersOnline.add(user);
     }
 
-    public void removeToUsersOnline(UUID user) {
-        usersOnline.remove(user);
+    public void removeToUsersOnline(UUID sessionId) {
+        usersOnline.remove(findBySessionId(sessionId));
     }
 
     public List<UserImpl> getUsers() {
@@ -48,8 +48,18 @@ public class StorageImpl {
         return usersOnline.size();
     }
 
-    public List<UUID> getUsersOnline() {
+    public List<UserImpl> getUsersOnline() {
         return this.usersOnline;
+    }
+
+    public UserImpl findBySessionId(UUID sessionId) {
+        UserImpl user = null;
+        for (UserImpl userOnline : usersOnline) {
+            if (userOnline.getCurrentSessionId().equals(sessionId)) {
+                user = userOnline;
+            }
+        }
+        return user;
     }
 
 }
