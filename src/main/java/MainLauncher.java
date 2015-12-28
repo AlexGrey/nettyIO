@@ -28,17 +28,10 @@ public class MainLauncher {
         final SocketIOServer server = new SocketIOServer(config);
         final ValidatorImpl validator = new ValidatorImpl();
 
-        /*Временно*/
-        UserImpl user1 = new UserImpl("john", "123");
-        UserImpl user2 = new UserImpl("mike", "123");
-
-        AccountServiceImpl.getInstance().registration(user1);
-        AccountServiceImpl.getInstance().registration(user2);
-
         server.addEventListener("reg", AccountObject.class, new DataListener<AccountObject>() {
             public void onData(SocketIOClient client, AccountObject data, AckRequest ackRequest) {
                 UserImpl user = new UserImpl(data.getName(), data.getPassword());
-                if (!validator.userIsExist(user, AccountServiceImpl.getInstance().getUsers())) {
+                if (!validator.userIsExist(user)) {
                     AccountServiceImpl.getInstance().registration(user);
                     data.setAnswer("пользователь с именем: " + user.getName() + " успешно зарегистрирован!");
                 } else {

@@ -1,6 +1,7 @@
 package modules.gameMechanics;
 
 import com.corundumstudio.socketio.SocketIOServer;
+import core.accountService.AccountServiceImpl;
 import core.accountService.UserImpl;
 import serializableObj.AccountObject;
 
@@ -98,8 +99,10 @@ public class Game {
             obj.setAnswer("Вы выиграли!");
             server.getClient(user2.getCurrentSessionId()).sendEvent("resultGame", obj);
         }
-        for (UserImpl user : users) {
-            System.out.println(user.getName() + ":" + user.getClicks());
+        for (UserImpl user : AccountServiceImpl.getInstance().getUsers()) {
+            user.setClicks(0);
+            user.setReadyToFight(false);
+            user.setGameFinish(false);
         }
     }
 

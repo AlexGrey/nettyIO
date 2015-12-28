@@ -58,12 +58,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public UserImpl findUserByName(String name) {
-        UserImpl seekingUser = null;
-        for (UserImpl user : StorageImpl.getInstance().getUsers()) {
-            if (user.getName().equals(name)) {
-                seekingUser = user;
-            }
-        }
+        UserImpl seekingUser = StorageImpl.getInstance().finUserByName(name);
         return seekingUser;
     }
 

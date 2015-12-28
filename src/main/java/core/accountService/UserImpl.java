@@ -1,5 +1,7 @@
 package core.accountService;
 
+import core.storageService.StorageImpl;
+
 import java.util.UUID;
 
 /**
@@ -53,19 +55,20 @@ public class UserImpl {
     }
 
     public int getWins() {
-        return wins;
+        return StorageImpl.getInstance().getWins(this.name);
+
     }
 
     public void setWins() {
-        this.wins++;
+        StorageImpl.getInstance().updateWins(this.name);
     }
 
     public int getLose() {
-        return lose;
+        return StorageImpl.getInstance().getLose(this.name);
     }
 
     public void setLose() {
-        this.lose++;
+        StorageImpl.getInstance().updateLose(this.name);
     }
 
     public boolean isReadyToFight() {
