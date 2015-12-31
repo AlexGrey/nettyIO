@@ -24,7 +24,7 @@ public class MainLauncher {
 
         Configuration config = new Configuration();
         config.setHostname("localhost");
-        config.setPort(4567);
+        config.setPort(8080);
         final SocketIOServer server = new SocketIOServer(config);
         final ValidatorImpl validator = new ValidatorImpl();
 
