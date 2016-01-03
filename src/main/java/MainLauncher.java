@@ -23,7 +23,8 @@ public class MainLauncher {
     public static void main(String[] args) throws InterruptedException {
 
         Configuration config = new Configuration();
-        config.setHostname("localhost");
+        config.setOrigin("*");
+        config.setHostname("54.194.200.72");
         config.setPort(8080);
         final SocketIOServer server = new SocketIOServer(config);
         final ValidatorImpl validator = new ValidatorImpl();
