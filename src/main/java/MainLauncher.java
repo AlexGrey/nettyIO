@@ -31,6 +31,7 @@ public class MainLauncher {
 
         server.addEventListener("reg", AccountObject.class, new DataListener<AccountObject>() {
             public void onData(SocketIOClient client, AccountObject data, AckRequest ackRequest) {
+                System.out.println(client);
                 UserImpl user = new UserImpl(data.getName(), data.getPassword());
                 if (!validator.userIsExist(user)) {
                     AccountServiceImpl.getInstance().registration(user);
